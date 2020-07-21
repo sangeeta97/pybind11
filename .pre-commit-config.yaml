@@ -26,3 +26,15 @@ repos:
   - id: flake8
     additional_dependencies: [flake8-bugbear]
     exclude: ^(docs/.*|tools/.*)$
+
+- repo: local
+  hooks:
+  - id: docker-clang-format
+    name: Docker Clang Format
+    language: docker_image
+    types:
+    - c++
+    entry: unibeautify/clang-format:latest
+    args:
+    - -style=file
+    - -i
