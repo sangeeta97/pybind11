@@ -9,25 +9,21 @@
 
 #pragma once
 
-#include "pybind11.h"
 #include "eval.h"
+#include "pybind11.h"
 
 #if defined(PYPY_VERSION)
-#  error Embedding the interpreter is not supported with PyPy
+#    error Embedding the interpreter is not supported with PyPy
 #endif
 
 #if PY_MAJOR_VERSION >= 3
-#  define PYBIND11_EMBEDDED_MODULE_IMPL(name)            \
-      extern "C" PyObject *pybind11_init_impl_##name();  \
-      extern "C" PyObject *pybind11_init_impl_##name() { \
-          return pybind11_init_wrapper_##name();         \
-      }
+#    define PYBIND11_EMBEDDED_MODULE_IMPL(name)                                                   \
+        extern "C" PyObject *pybind11_init_impl_##name();                                         \
+        extern "C" PyObject *pybind11_init_impl_##name() { return pybind11_init_wrapper_##name(); }
 #else
-#  define PYBIND11_EMBEDDED_MODULE_IMPL(name)            \
-      extern "C" void pybind11_init_impl_##name();       \
-      extern "C" void pybind11_init_impl_##name() {      \
-          pybind11_init_wrapper_##name();                \
-      }
+#    define PYBIND11_EMBEDDED_MODULE_IMPL(name)                                                   \
+        extern "C" void pybind11_init_impl_##name();                                              \
+        extern "C" void pybind11_init_impl_##name() { pybind11_init_wrapper_##name(); }
 #endif
 
 /** \rst
@@ -45,27 +41,25 @@
             });
         }
  \endrst */
-#define PYBIND11_EMBEDDED_MODULE(name, variable)                              \
-    static void PYBIND11_CONCAT(pybind11_init_, name)(pybind11::module &);    \
-    static PyObject PYBIND11_CONCAT(*pybind11_init_wrapper_, name)() {        \
-        auto m = pybind11::module(PYBIND11_TOSTRING(name));                   \
-        try {                                                                 \
-            PYBIND11_CONCAT(pybind11_init_, name)(m);                         \
-            return m.ptr();                                                   \
-        } catch (pybind11::error_already_set &e) {                            \
-            PyErr_SetString(PyExc_ImportError, e.what());                     \
-            return nullptr;                                                   \
-        } catch (const std::exception &e) {                                   \
-            PyErr_SetString(PyExc_ImportError, e.what());                     \
-            return nullptr;                                                   \
-        }                                                                     \
-    }                                                                         \
-    PYBIND11_EMBEDDED_MODULE_IMPL(name)                                       \
-    pybind11::detail::embedded_module PYBIND11_CONCAT(pybind11_module_, name) \
-                              (PYBIND11_TOSTRING(name),             \
-                               PYBIND11_CONCAT(pybind11_init_impl_, name));   \
-    void PYBIND11_CONCAT(pybind11_init_, name)(pybind11::module &variable)
-
+#define PYBIND11_EMBEDDED_MODULE(name, variable)                                                  \
+    static void PYBIND11_CONCAT(pybind11_init_, name)(pybind11::module &);                        \
+    static PyObject PYBIND11_CONCAT(*pybind11_init_wrapper_, name)() {                            \
+        auto m = pybind11::module(PYBIND11_TOSTRING(name));                                       \
+        try {                                                                                     \
+            PYBIND11_CONCAT(pybind11_init_, name)(m);                                             \
+            return m.ptr();                                                                       \
+        } catch (pybind11::error_already_set & e) {                                               \
+            PyErr_SetString(PyExc_ImportError, e.what());                                         \
+            return nullptr;                                                                       \
+        } catch (const std::exception &e) {                                                       \
+            PyErr_SetString(PyExc_ImportError, e.what());                                         \
+            return nullptr;                                                                       \
+        }                                                                                         \
+    }                                                                                             \
+    PYBIND11_EMBEDDED_MODULE_IMPL(name)                                                           \
+    pybind11::detail::embedded_module PYBIND11_CONCAT(pybind11_module_, name)(                    \
+        PYBIND11_TOSTRING(name), PYBIND11_CONCAT(pybind11_init_impl_, name));                     \
+    void PYBIND11_CONCAT(pybind11_init_, name)(pybind11::module & variable)
 
 PYBIND11_NAMESPACE_BEGIN(PYBIND11_NAMESPACE)
 PYBIND11_NAMESPACE_BEGIN(detail)
@@ -73,7 +67,7 @@ PYBIND11_NAMESPACE_BEGIN(detail)
 /// Python 2.7/3.x compatible version of `PyImport_AppendInittab` and error checks.
 struct embedded_module {
 #if PY_MAJOR_VERSION >= 3
-    using init_t = PyObject *(*)();
+    using init_t = PyObject *(*) ();
 #else
     using init_t = void (*)();
 #endif

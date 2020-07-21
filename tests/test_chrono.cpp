@@ -15,7 +15,7 @@ TEST_SUBMODULE(chrono, m) {
     using system_time = std::chrono::system_clock::time_point;
     using steady_time = std::chrono::steady_clock::time_point;
 
-    using timespan = std::chrono::duration<int64_t, std::nano>;
+    using timespan  = std::chrono::duration<int64_t, std::nano>;
     using timestamp = std::chrono::time_point<std::chrono::system_clock, timespan>;
 
     // test_chrono_system_clock
@@ -46,10 +46,9 @@ TEST_SUBMODULE(chrono, m) {
     // Roundtrip a duration in microseconds from a float argument
     m.def("test_chrono7", [](std::chrono::microseconds t) { return t; });
     // Float durations (issue #719)
-    m.def("test_chrono_float_diff", [](std::chrono::duration<float> a, std::chrono::duration<float> b) {
-        return a - b; });
+    m.def("test_chrono_float_diff",
+          [](std::chrono::duration<float> a, std::chrono::duration<float> b) { return a - b; });
 
-    m.def("test_nano_timepoint", [](timestamp start, timespan delta) -> timestamp {
-        return start + delta;
-    });
+    m.def("test_nano_timepoint",
+          [](timestamp start, timespan delta) -> timestamp { return start + delta; });
 }
